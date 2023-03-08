@@ -3,7 +3,6 @@ module github.com/jesusdf/rdpgw
 go 1.19
 
 require (
-	github.com/jesusdf/gokrb5/v8 v8.5.0
 	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-jose/go-jose/v3 v3.0.0
@@ -13,6 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/jcmturner/gofork v1.7.6
 	github.com/jcmturner/goidentity/v6 v6.0.1
+	github.com/jesusdf/gokrb5/v8 v8.5.1
 	github.com/knadh/koanf v1.4.2
 	github.com/msteinert/pam v1.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
