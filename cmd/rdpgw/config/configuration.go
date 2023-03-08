@@ -95,6 +95,8 @@ type ClientConfig struct {
 	UsernameTemplate    string `koanf:"usernametemplate"`
 	SplitUserDomain     bool   `koanf:"splituserdomain"`
 	DefaultDomain       string `koanf:"defaultdomain"`
+	ExtraSettings       map[string]interface{} `koanf:"extrasettings"`
+	AllowExtraSettings  bool              `koanf:"allowextrasettings"`
 }
 
 func ToCamel(s string) string {
@@ -147,6 +149,7 @@ func Load(configFile string) Configuration {
 		"Server.AuthSocket":          "/tmp/rdpgw-auth.sock",
 		"Client.NetworkAutoDetect":   1,
 		"Client.BandwidthAutoDetect": 1,
+		"Client.AllowExtraSettings":  false,
 		"Security.VerifyClientIp":    true,
 		"Caps.TokenAuth":             true,
 	}, "."), nil)

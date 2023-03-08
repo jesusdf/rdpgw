@@ -114,6 +114,8 @@ func main() {
 			NetworkAutoDetect:   conf.Client.NetworkAutoDetect,
 			BandwidthAutoDetect: conf.Client.BandwidthAutoDetect,
 			ConnectionType:      conf.Client.ConnectionType,
+			ExtraSettings:       conf.Client.ExtraSettings,
+			AllowExtraSettings:  conf.Client.AllowExtraSettings,
 		},
 		GatewayAddress: url,
 	}

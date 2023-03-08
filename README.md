@@ -135,6 +135,9 @@ Client:
   # If true puts splits "user@domain.com" into the user and domain component so that
   # domain gets set in the rdp file and the domain name is stripped from the username
   SplitUserDomain: false
+  # If true users may also be able to add extra settings in query parameters, e.g
+  # /connect?host=X.X.X.X:3389&use multimon=1, which ultimately take precedence.
+  AllowExtraSettings: true
 Security:
   # a random string of 32 characters to secure cookies on the client
   # make sure to share this amongst different pods

@@ -37,6 +37,8 @@ type RdpOpts struct {
 	NetworkAutoDetect   int
 	BandwidthAutoDetect int
 	ConnectionType      int
+	ExtraSettings       map[string]interface{}
+	AllowExtraSettings  bool
 }
 
 type Handler struct {
@@ -202,6 +204,19 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	rdp.Session.ConnectionType = opts.ConnectionType
 	rdp.Display.SmartSizing = true
 	rdp.Display.BitmapCacheSize = 32000
+	
+	extraSettings := make(map[string]interface{})
+	for k, v := range opts.ExtraSettings {
+		extraSettings[k] = v
+	}
+	if opts.AllowExtraSettings {
+		query := r.URL.Query()
+		query.Del("host")
+		for k, v := range query {
+			extraSettings[k] = v[len(v)-1]
+		}
+	}
+	rdp.SetExtraSettings(extraSettings)
 
 	http.ServeContent(w, r, fn, time.Now(), strings.NewReader(rdp.String()))
 }
