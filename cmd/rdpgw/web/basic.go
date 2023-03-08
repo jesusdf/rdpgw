@@ -2,8 +2,8 @@ package web
 
 import (
 	"context"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
-	"github.com/bolkedebruin/rdpgw/shared/auth"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/shared/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"

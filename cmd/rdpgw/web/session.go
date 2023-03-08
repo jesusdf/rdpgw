@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"

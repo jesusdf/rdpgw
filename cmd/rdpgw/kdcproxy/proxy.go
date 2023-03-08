@@ -2,7 +2,7 @@ package kdcproxy
 
 import (
 	"fmt"
-	krbconfig "github.com/bolkedebruin/gokrb5/v8/config"
+	krbconfig "github.com/jesusdf/gokrb5/v8/config"
 	"github.com/jcmturner/gofork/encoding/asn1"
 	"io"
 	"log"

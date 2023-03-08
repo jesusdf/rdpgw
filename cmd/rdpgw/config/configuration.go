@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/security"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/security"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/confmap"

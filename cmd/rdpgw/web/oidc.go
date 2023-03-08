@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2"

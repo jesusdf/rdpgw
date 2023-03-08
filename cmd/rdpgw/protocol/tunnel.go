@@ -1,14 +1,14 @@
 package protocol
 
 import (
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/transport"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/transport"
 	"net"
 	"time"
 )
 
 const (
-	CtxTunnel = "github.com/bolkedebruin/rdpgw/tunnel"
+	CtxTunnel = "github.com/jesusdf/rdpgw/tunnel"
 )
 
 type Tunnel struct {

@@ -2,8 +2,8 @@ package web
 
 import (
 	"context"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/security"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/security"
 	"net/http"
 	"net/http/httptest"
 	"net/url"

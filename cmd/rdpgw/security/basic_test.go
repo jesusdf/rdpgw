@@ -2,8 +2,8 @@ package security
 
 import (
 	"context"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/identity"
-	"github.com/bolkedebruin/rdpgw/cmd/rdpgw/protocol"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/protocol"
 	"testing"
 )
 

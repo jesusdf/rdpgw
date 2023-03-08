@@ -1,13 +1,13 @@
 GO Remote Desktop Gateway
 =========================
 
-![Go](https://github.com/bolkedebruin/rdpgw/workflows/Go/badge.svg)
-[![Docker Pulls](https://badgen.net/docker/pulls/bolkedebruin/rdpgw?icon=docker&label=pulls)](https://hub.docker.com/r/bolkedebruin/rdpgw/)
-[![Docker Stars](https://badgen.net/docker/stars/bolkedebruin/rdpgw?icon=docker&label=stars)](https://hub.docker.com/r/bolkedebruin/rdpgw/)
-[![Docker Image Size](https://badgen.net/docker/size/bolkedebruin/rdpgw?icon=docker&label=image%20size)](https://hub.docker.com/r/bolkedebruin/rdpgw/)
+Forked and rebased from https://github.com/bolkedebruin/rdpgw to meet custom needs.
 
+![Go](https://github.com/jesusdf/rdpgw/workflows/Go/badge.svg)
+[![Docker Pulls](https://badgen.net/docker/pulls/jesusdf/rdpgw?icon=docker&label=pulls)](https://hub.docker.com/r/jesusdf/rdpgw/)
+[![Docker Stars](https://badgen.net/docker/stars/jesusdf/rdpgw?icon=docker&label=stars)](https://hub.docker.com/r/jesusdf/rdpgw/)
+[![Docker Image Size](https://badgen.net/docker/size/jesusdf/rdpgw?icon=docker&label=image%20size)](https://hub.docker.com/r/jesusdf/rdpgw/)
 
-:star: Star us on GitHub — it helps!
 
 RDPGW is an implementation of the [Remote Desktop Gateway protocol](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-tsgu/0007d661-a86d-4e8f-89f7-7f77f8824188).
 This allows you to connect with the official Microsoft clients to remote desktops over HTTPS. 
@@ -176,7 +176,7 @@ https://yourserver/tokeninfo . The query parameter is 'access_token' so
 you can just do a GET to https://yourserver/tokeninfo?access_token=<token> .
 It will return 200 OK with the decrypted token.
 
-In this way you can integrate, for example, it with [pam-jwt](https://github.com/bolkedebruin/pam-jwt).
+In this way you can integrate, for example, it with [pam-jwt](https://github.com/jesusdf/pam-jwt).
 
 ## TODO
 * Integrate Open Policy Agent
