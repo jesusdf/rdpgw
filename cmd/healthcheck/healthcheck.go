@@ -16,7 +16,7 @@ func main() {
     os.Exit(-1)
    }
 
-   if resp.StatusCode == 200 {
+   if resp.StatusCode == 302 {
 	  os.Exit(0)
    } else {
 	  os.Exit(-2)
