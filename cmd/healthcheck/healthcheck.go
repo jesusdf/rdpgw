@@ -4,11 +4,13 @@ package main
 
 import (
   "os"
+  "crypto/tls"
   "net/http"
 )
 
 func main() {
-   resp, err := http.Head(os.Args[1])
+   http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+   resp, err := http.Get(os.Args[1])
    if err != nil {
     panic(err)
     os.Exit(-1)
