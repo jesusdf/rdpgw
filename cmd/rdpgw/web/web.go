@@ -183,9 +183,9 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// authenticated
-	seed := make([]byte, 16)
+	seed := make([]byte, 8)
 	rand.Read(seed)
-	fn := hex.EncodeToString(seed) + ".rdp"
+	fn := strings.Split(h.gatewayAddress.Host, ".")[0] + "-" + host + "-" + hex.EncodeToString(seed) + ".rdp"
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+fn)
 	w.Header().Set("Content-Type", "application/x-rdp")
