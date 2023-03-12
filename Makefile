@@ -2,6 +2,7 @@ BINDIR      := $(CURDIR)/bin
 INSTALL_PATH ?= /usr/local/bin
 BINNAME     ?= rdpgw
 BINNAME2    ?= rdpgw-auth
+BINNAME3    ?= healthcheck
 
 # Rebuild the binary if any of these files change
 SRC := $(shell find . -type f -name '*.go' -print) go.mod go.sum
@@ -37,6 +38,7 @@ build: $(BINDIR)/$(BINNAME)
 $(BINDIR)/$(BINNAME): $(SRC)
 	go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME) ./cmd/rdpgw
 	go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME2) ./cmd/auth
+	go build $(GOFLAGS) -trimpath -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o '$(BINDIR)'/$(BINNAME3) ./cmd/healthcheck
 
 # ------------------------------------------------------------------------------
 #  install
@@ -44,6 +46,8 @@ $(BINDIR)/$(BINNAME): $(SRC)
 .PHONY: install
 install: build
 	@install "$(BINDIR)/$(BINNAME)" "$(INSTALL_PATH)/$(BINNAME)"
+	@install "$(BINDIR)/$(BINNAME2)" "$(INSTALL_PATH)/$(BINNAME2)"
+	@install "$(BINDIR)/$(BINNAME3)" "$(INSTALL_PATH)/$(BINNAME3)"
 
 # ------------------------------------------------------------------------------
 #  mod

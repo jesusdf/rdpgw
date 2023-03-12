@@ -4,6 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"strconv"
+
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gorilla/mux"
 	"github.com/jesusdf/gokrb5/v8/keytab"
 	"github.com/jesusdf/gokrb5/v8/service"
 	"github.com/jesusdf/gokrb5/v8/spnego"
@@ -12,17 +20,10 @@ import (
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/protocol"
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/security"
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/web"
-	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/thought-machine/go-flags"
 	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/oauth2"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"strconv"
 )
 
 const (
@@ -213,6 +214,9 @@ func main() {
 
 	// for sso callbacks
 	r.HandleFunc("/tokeninfo", web.TokenInfo)
+
+	// for healthcheck
+	r.HandleFunc("/teapot", web.Teapot)
 
 	// gateway endpoint
 	rdp := r.PathPrefix(gatewayEndPoint).Subrouter()
