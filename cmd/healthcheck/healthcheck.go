@@ -7,6 +7,7 @@ import (
   "crypto/tls"
   "net/http"
   "strconv"
+  "fmt"
 )
 
 func main() {
@@ -16,20 +17,24 @@ func main() {
    expectedCode, err := strconv.Atoi(os.Args[1])
 
    if err != nil {
-    panic(err)
-    os.Exit(-1)
+	panic(err)
+	os.Exit(-1)
    }
 
    resp, err := http.Get(os.Args[2])
 
    if err != nil {
-    panic(err)
-    os.Exit(-2)
+	panic(err)
+	os.Exit(-2)
    }
 
    if resp.StatusCode == expectedCode {
-	  os.Exit(0)
+	fmt.Printf("[OK]\n")
+	os.Exit(0)
    } else {
-	  os.Exit(-3)
+	fmt.Printf("[KO] Got status code %v and it should be %v.\n", resp.StatusCode, expectedCode)
+	os.Exit(-3)
    }
+
 }
+
