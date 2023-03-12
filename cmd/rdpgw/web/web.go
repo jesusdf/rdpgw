@@ -5,13 +5,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 )
 
 type TokenGeneratorFunc func(context.Context, string, string) (string, error)
@@ -185,7 +186,8 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	// authenticated
 	seed := make([]byte, 8)
 	rand.Read(seed)
-	fn := strings.Split(h.gatewayAddress.Host, ".")[0] + "-" + host + "-" + hex.EncodeToString(seed) + ".rdp"
+
+	fn := strings.Split(h.gatewayAddress.Host, ".")[0] + "-" + strings.Replace(strings.Replace(host, ":", "", 1), "3389", "", 1) + "-" + hex.EncodeToString(seed) + ".rdp"
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+fn)
 	w.Header().Set("Content-Type", "application/x-rdp")
@@ -204,7 +206,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	rdp.Session.ConnectionType = opts.ConnectionType
 	rdp.Display.SmartSizing = true
 	rdp.Display.BitmapCacheSize = 32000
-	
+
 	extraSettings := make(map[string]interface{})
 	for k, v := range opts.ExtraSettings {
 		extraSettings[k] = v
