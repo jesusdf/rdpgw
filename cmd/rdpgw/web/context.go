@@ -1,16 +1,18 @@
 package web
 
 import (
-	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
-	"github.com/jcmturner/goidentity/v6"
 	"log"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/jcmturner/goidentity/v6"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 )
 
 func EnrichContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		id, err := GetSessionIdentity(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -25,8 +27,11 @@ func EnrichContext(next http.Handler) http.Handler {
 			}
 		}
 
-		log.Printf("Identity SessionId: %s, UserName: %s: Authenticated: %t",
-			id.SessionId(), id.UserName(), id.Authenticated())
+		// Healthcheck doesn't need any log
+		if r.URL.Path != "/teapot" {
+			log.Printf("Identity SessionId: %s, UserName: %s: Authenticated: %t",
+				id.SessionId(), id.UserName(), id.Authenticated())
+		}
 
 		h := r.Header.Get("X-Forwarded-For")
 		if h != "" {
