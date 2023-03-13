@@ -25,6 +25,9 @@ jobs:
         with:
          username: ${{ secrets.DOCKER_USER }}
          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Last commit
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -32,7 +35,9 @@ jobs:
           file: ./dev/docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ github.repository_owner }}/rdpgw:latest
+          tags:
+            ${{ github.repository_owner }}/rdpgw:latest
+            ${{ github.repository_owner }}/rdpgw:${{ steps.vars.outputs.sha_short }}
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
         with:
