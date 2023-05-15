@@ -185,7 +185,12 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 
 	// authenticated
 	seed := make([]byte, 8)
-	rand.Read(seed)
+	_, err = rand.Read(seed)
+	if err != nil {
+		log.Printf("Cannot generate random seed due to %s", err)
+		http.Error(w, errors.New("unable to generate random sequence").Error(), http.StatusInternalServerError)
+		return
+	}
 
 	fn := strings.Split(h.gatewayAddress.Host, ".")[0] + "-" + strings.Replace(strings.Replace(host, ":", "", 1), "3389", "", 1) + "-" + hex.EncodeToString(seed) + ".rdp"
 
