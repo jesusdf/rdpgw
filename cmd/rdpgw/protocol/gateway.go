@@ -3,17 +3,18 @@ package protocol
 import (
 	"context"
 	"errors"
-	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
-	"github.com/jesusdf/rdpgw/cmd/rdpgw/transport"
-	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
-	"github.com/patrickmn/go-cache"
 	"log"
 	"net"
 	"net/http"
 	"reflect"
 	"syscall"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/transport"
+	"github.com/patrickmn/go-cache"
 )
 
 const (
@@ -75,6 +76,8 @@ func (g *Gateway) HandleGatewayProtocol(w http.ResponseWriter, r *http.Request) 
 		t = x.(*Tunnel)
 	}
 	ctx = context.WithValue(ctx, CtxTunnel, t)
+
+	log.Printf("TRACKING [%s] %s -> %s", id.GetAttribute(identity.AttrClientIp).(string), id.DisplayName(), t.TargetServer)
 
 	if r.Method == MethodRDGOUT {
 		if r.Header.Get("Connection") != "upgrade" && r.Header.Get("Upgrade") != "websocket" {

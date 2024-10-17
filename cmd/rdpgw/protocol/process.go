@@ -134,7 +134,6 @@ func (p *Processor) Process(ctx context.Context) error {
 			}
 
 			log.Printf("Establishing connection to RDP server: %s", host)
-			log.Printf("TRACKING [%s] %s -> %s", p.tunnel.RemoteAddr, p.tunnel.User.UserName(), host)
 			p.tunnel.rwc, err = net.DialTimeout("tcp", host, time.Second*15)
 			if err != nil {
 				log.Printf("Error connecting to %s, %s", host, err)
