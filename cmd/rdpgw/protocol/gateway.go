@@ -77,8 +77,6 @@ func (g *Gateway) HandleGatewayProtocol(w http.ResponseWriter, r *http.Request) 
 	}
 	ctx = context.WithValue(ctx, CtxTunnel, t)
 
-	log.Printf("TRACKING [%s] %s -> %s", id.GetAttribute(identity.AttrClientIp).(string), id.DisplayName(), t.TargetServer)
-
 	if r.Method == MethodRDGOUT {
 		if r.Header.Get("Connection") != "upgrade" && r.Header.Get("Upgrade") != "websocket" {
 			g.handleLegacyProtocol(w, r.WithContext(ctx), t)
@@ -97,7 +95,7 @@ func (g *Gateway) HandleGatewayProtocol(w http.ResponseWriter, r *http.Request) 
 			log.Printf("Cannot set send/receive buffers: %t", err)
 		}
 
-		g.handleWebsocketProtocol(ctx, conn, t)
+		g.handleWebsocketProtocol(ctx, conn, r.WithContext(ctx), t)
 	} else if r.Method == MethodRDGIN {
 		g.handleLegacyProtocol(w, r.WithContext(ctx), t)
 	}
@@ -162,7 +160,7 @@ func (g *Gateway) setSendReceiveBuffers(conn net.Conn) error {
 	return nil
 }
 
-func (g *Gateway) handleWebsocketProtocol(ctx context.Context, c *websocket.Conn, t *Tunnel) {
+func (g *Gateway) handleWebsocketProtocol(ctx context.Context, c *websocket.Conn, r *http.Request, t *Tunnel) {
 	websocketConnections.Inc()
 	defer websocketConnections.Dec()
 
@@ -177,7 +175,7 @@ func (g *Gateway) handleWebsocketProtocol(ctx context.Context, c *websocket.Conn
 	handler := NewProcessor(g, t)
 	RegisterTunnel(t, handler)
 	defer RemoveTunnel(t)
-	handler.Process(ctx)
+	handler.Process(ctx, r)
 }
 
 // The legacy protocol (no websockets) uses an RDG_IN_DATA for client -> server
@@ -225,7 +223,7 @@ func (g *Gateway) handleLegacyProtocol(w http.ResponseWriter, r *http.Request, t
 			handler := NewProcessor(g, t)
 			RegisterTunnel(t, handler)
 			defer RemoveTunnel(t)
-			handler.Process(r.Context())
+			handler.Process(r.Context(), r)
 		}
 	}
 }
