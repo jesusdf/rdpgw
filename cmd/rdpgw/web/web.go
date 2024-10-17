@@ -128,6 +128,7 @@ func (h *Handler) getHost(ctx context.Context, u *url.URL) (string, error) {
 
 func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	id := identity.FromRequestCtx(r)
+	client := id.GetAttribute(identity.AttrClientIp).(string)
 	ctx := r.Context()
 
 	opts := h.rdpOpts
@@ -192,7 +193,11 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fn := strings.Split(h.gatewayAddress.Host, ".")[0] + "-" + strings.Replace(strings.Replace(host, ":", "", 1), "3389", "", 1) + "-" + hex.EncodeToString(seed) + ".rdp"
+	prefix := strings.Split(h.gatewayAddress.Host, ".")[0]
+
+	log.Printf("DOWNLOAD [%s] %s > %s -> %s", prefix, user, client, host)
+
+	fn := prefix + "-" + strings.Replace(strings.Replace(host, ":", "", 1), "3389", "", 1) + "-" + hex.EncodeToString(seed) + ".rdp"
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+fn)
 	w.Header().Set("Content-Type", "application/x-rdp")

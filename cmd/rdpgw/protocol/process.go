@@ -46,7 +46,6 @@ const tunnelId = 10
 func (p *Processor) Process(ctx context.Context, r *http.Request) error {
 	for {
 		pt, sz, pkt, err := p.tunnel.Read()
-		id := identity.FromRequestCtx(r)
 
 		if err != nil {
 			log.Printf("Cannot read message from stream %p", err)
@@ -135,8 +134,6 @@ func (p *Processor) Process(ctx context.Context, r *http.Request) error {
 					return fmt.Errorf("%x: denied by security policy", E_PROXY_RAP_ACCESSDENIED)
 				}
 			}
-
-			log.Printf("TRACKING [%s] %s %s %s -> %s", p.tunnel.User.GetAttribute(identity.AttrClientIp), p.tunnel.User.UserName(), p.tunnel.User.DisplayName(), id.UserName(), host)
 
 			log.Printf("Establishing connection to RDP server: %s", host)
 			p.tunnel.rwc, err = net.DialTimeout("tcp", host, time.Second*15)
