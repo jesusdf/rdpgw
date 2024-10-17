@@ -6,12 +6,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"io"
 	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 )
 
 type Processor struct {
@@ -131,7 +132,9 @@ func (p *Processor) Process(ctx context.Context) error {
 					return fmt.Errorf("%x: denied by security policy", E_PROXY_RAP_ACCESSDENIED)
 				}
 			}
+
 			log.Printf("Establishing connection to RDP server: %s", host)
+			log.Printf("TRACKING [%s] %s -> %s", p.tunnel.RemoteAddr, p.tunnel.User.UserName(), host)
 			p.tunnel.rwc, err = net.DialTimeout("tcp", host, time.Second*15)
 			if err != nil {
 				log.Printf("Error connecting to %s, %s", host, err)
