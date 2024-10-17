@@ -128,7 +128,7 @@ func (h *Handler) getHost(ctx context.Context, u *url.URL) (string, error) {
 
 func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	id := identity.FromRequestCtx(r)
-	client := id.GetAttribute(identity.AttrClientIp).(string)
+	client := id.GetAttribute(identity.AttrClientIp)
 	ctx := r.Context()
 
 	opts := h.rdpOpts
