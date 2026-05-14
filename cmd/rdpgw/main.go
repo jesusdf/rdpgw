@@ -212,6 +212,9 @@ func main() {
 	// prometheus metrics
 	r.Handle("/metrics", promhttp.Handler())
 
+	// active RDP sessions (user + backend), same host/port as the gateway
+	r.HandleFunc("/connections", web.ConnectionsStatus)
+
 	// for sso callbacks
 	r.HandleFunc("/tokeninfo", web.TokenInfo)
 

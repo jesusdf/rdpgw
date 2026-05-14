@@ -40,8 +40,8 @@ func CheckSession(next protocol.CheckHostFunc) protocol.CheckHostFunc {
 			return false, errors.New("no valid session info found in context")
 		}
 
-		if tunnel.TargetServer != host {
-			log.Printf("Client specified host %s does not match token host %s", host, tunnel.TargetServer)
+		if tunnel.GetTargetServer() != host {
+			log.Printf("Client specified host %s does not match token host %s", host, tunnel.GetTargetServer())
 			return false, nil
 		}
 
@@ -106,9 +106,7 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	tunnel := getTunnel(ctx)
 
-	tunnel.TargetServer = custom.RemoteServer
-	tunnel.RemoteAddr = custom.ClientIP
-	tunnel.User.SetUserName(user.Subject)
+	tunnel.ApplyPAAIdentity(custom.RemoteServer, custom.ClientIP, user.Subject)
 
 	return true, nil
 }

@@ -143,7 +143,7 @@ func (p *Processor) Process(ctx context.Context, r *http.Request) error {
 				p.tunnel.Write(msg)
 				return err
 			}
-			p.tunnel.TargetServer = host
+			p.tunnel.SetTargetServer(host)
 			log.Printf("Connection established")
 			msg := p.channelResponse(ERROR_SUCCESS)
 			p.tunnel.Write(msg)

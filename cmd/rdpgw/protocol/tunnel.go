@@ -1,10 +1,12 @@
 package protocol
 
 import (
+	"net"
+	"sync"
+	"time"
+
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/transport"
-	"net"
-	"time"
 )
 
 const (
@@ -44,6 +46,44 @@ type Tunnel struct {
 
 	// LastSeen is when the server received the last packet from the client
 	LastSeen time.Time
+
+	metaMu sync.RWMutex
+}
+
+// SetTargetServer records the TCP destination after the RDP channel is established.
+func (t *Tunnel) SetTargetServer(host string) {
+	t.metaMu.Lock()
+	t.TargetServer = host
+	t.metaMu.Unlock()
+}
+
+// GetTargetServer returns the current backend address (empty until the channel is open).
+func (t *Tunnel) GetTargetServer() string {
+	t.metaMu.RLock()
+	defer t.metaMu.RUnlock()
+	return t.TargetServer
+}
+
+// ApplyPAAIdentity sets tunnel fields from a validated PAA (gateway) token.
+func (t *Tunnel) ApplyPAAIdentity(remoteServer, clientIP, subject string) {
+	t.metaMu.Lock()
+	t.TargetServer = remoteServer
+	t.RemoteAddr = clientIP
+	if t.User != nil {
+		t.User.SetUserName(subject)
+	}
+	t.metaMu.Unlock()
+}
+
+// ActiveSession returns the display name and target host for status listings.
+func (t *Tunnel) ActiveSession() (displayName, target string) {
+	t.metaMu.RLock()
+	defer t.metaMu.RUnlock()
+	target = t.TargetServer
+	if t.User != nil {
+		displayName = t.User.DisplayName()
+	}
+	return
 }
 
 // Write puts the packet on the transport and updates the statistics for bytes sent
