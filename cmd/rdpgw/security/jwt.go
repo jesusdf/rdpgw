@@ -106,9 +106,31 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	tunnel := getTunnel(ctx)
 
-	tunnel.ApplyPAAIdentity(custom.RemoteServer, custom.ClientIP, user.Subject)
+	// Subject del JWT PAA: mismo username que en GeneratePAAToken al descargar el .rdp.
+	// user.Subject de UserInfo OIDC suele ser el claim "sub" (opaco), no preferred_username.
+	username := standard.Subject
+	if username == "" {
+		username = usernameFromOIDCUserInfo(user)
+	}
+	tunnel.ApplyPAAIdentity(custom.RemoteServer, custom.ClientIP, username)
 
 	return true, nil
+}
+
+func usernameFromOIDCUserInfo(user *oidc.UserInfo) string {
+	if user == nil {
+		return ""
+	}
+	var claims map[string]interface{}
+	if err := user.Claims(&claims); err != nil {
+		return user.Subject
+	}
+	for _, claim := range []string{"preferred_username", "unique_name", "upn", "email", "name"} {
+		if s, ok := claims[claim].(string); ok && s != "" {
+			return s
+		}
+	}
+	return user.Subject
 }
 
 func GeneratePAAToken(ctx context.Context, username string, server string) (string, error) {
