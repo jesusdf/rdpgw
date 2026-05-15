@@ -2,6 +2,7 @@ package protocol
 
 import (
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -75,15 +76,45 @@ func (t *Tunnel) ApplyPAAIdentity(remoteServer, clientIP, subject string) {
 	t.metaMu.Unlock()
 }
 
-// ActiveSession returns the display name and target host for status listings.
-func (t *Tunnel) ActiveSession() (displayName, target string) {
+// ConnectionInfo returns a snapshot of tunnel and identity fields for status APIs.
+func (t *Tunnel) ConnectionInfo() ActiveConnection {
 	t.metaMu.RLock()
 	defer t.metaMu.RUnlock()
-	target = t.TargetServer
-	if t.User != nil {
-		displayName = t.User.DisplayName()
+
+	info := ActiveConnection{
+		ID:            t.Id,
+		RDGConnection: t.RDGId,
+		Target:        t.TargetServer,
+		ConnectedAt:   t.ConnectedOn,
+		LastSeen:      t.LastSeen,
 	}
-	return
+	if t.User == nil {
+		return info
+	}
+	info.Username = t.User.UserName()
+	info.DisplayName = t.User.DisplayName()
+	info.Domain = t.User.Domain()
+	info.Email = t.User.Email()
+	info.Authenticated = t.User.Authenticated()
+	info.SessionID = t.User.SessionId()
+	info.ClientIP = identityStringAttr(t.User, identity.AttrClientIp)
+	if info.Domain == "" {
+		if creds := strings.SplitN(info.Username, "@", 2); len(creds) == 2 {
+			info.Domain = creds[1]
+		}
+	}
+	return info
+}
+
+func identityStringAttr(id identity.Identity, key string) string {
+	if id == nil {
+		return ""
+	}
+	v := id.GetAttribute(key)
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
 }
 
 // Write puts the packet on the transport and updates the statistics for bytes sent

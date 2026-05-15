@@ -3,6 +3,7 @@ package protocol
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 var (
@@ -17,8 +18,18 @@ type Monitor struct {
 
 // ActiveConnection describes one gateway tunnel for observability APIs.
 type ActiveConnection struct {
-	Username string `json:"username"`
-	Target   string `json:"target"`
+	ID            string    `json:"id"`
+	RDGConnection string    `json:"rdgConnectionId,omitempty"`
+	Username      string    `json:"username"`
+	DisplayName   string    `json:"displayName,omitempty"`
+	Domain        string    `json:"domain,omitempty"`
+	Email         string    `json:"email,omitempty"`
+	ClientIP      string    `json:"clientIp,omitempty"`
+	Target        string    `json:"target"`
+	ConnectedAt   time.Time `json:"connectedAt,omitempty"`
+	LastSeen      time.Time `json:"lastSeen,omitempty"`
+	Authenticated bool      `json:"authenticated"`
+	SessionID     string    `json:"sessionId,omitempty"`
 }
 
 const (
@@ -71,8 +82,7 @@ func SnapshotActiveConnections() []ActiveConnection {
 		if m == nil || m.Tunnel == nil {
 			continue
 		}
-		u, tgt := m.Tunnel.ActiveSession()
-		out = append(out, ActiveConnection{Username: u, Target: tgt})
+		out = append(out, m.Tunnel.ConnectionInfo())
 	}
 	return out
 }

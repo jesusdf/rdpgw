@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"log"
@@ -93,6 +94,7 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id.SetUserName(userName)
+	applyIdentityFromClaims(id, data)
 	id.SetAuthenticated(true)
 	id.SetAuthTime(time.Now())
 	id.SetAttribute(identity.AttrAccessToken, oauth2Token.AccessToken)
@@ -105,15 +107,30 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 }
 
 func findUsernameInClaims(data map[string]interface{}) string {
-	candidates := []string{"preferred_username", "unique_name", "upn"}
+	candidates := []string{"preferred_username", "unique_name", "upn", "email", "sub"}
 	for _, claim := range candidates {
 		userName, found := data[claim].(string)
-		if found {
+		if found && userName != "" {
 			return userName
 		}
 	}
 
 	return ""
+}
+
+func applyIdentityFromClaims(id identity.Identity, data map[string]interface{}) {
+	if s, ok := data["email"].(string); ok && s != "" {
+		id.SetEmail(s)
+	}
+	if s, ok := data["name"].(string); ok && s != "" {
+		id.SetDisplayName(s)
+		return
+	}
+	given, _ := data["given_name"].(string)
+	family, _ := data["family_name"].(string)
+	if given != "" || family != "" {
+		id.SetDisplayName(strings.TrimSpace(given + " " + family))
+	}
 }
 
 func (h *OIDC) Authenticated(next http.Handler) http.Handler {
