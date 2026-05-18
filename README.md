@@ -83,6 +83,8 @@ Server:
  Hosts:
   - localhost:3389
   - my-{{ preferred_username }}-host:3389
+ # Spaces in usernames are replaced with hyphens in the host label only (e.g. John Doe -> John-Doe).
+ # The RDP login username in the downloaded file still keeps spaces.
  # if true the server randomly selects a host to connect to
  # valid options are: 
  #  - roundrobin, which selects a random host from the list (default)
@@ -98,6 +100,9 @@ Server:
   # if a file store is chosen, it is required to have clients 'keep state' to the rdpgw
   # instance they are connected to.
  SessionStore: cookie
+ # Verbose troubleshooting logs (HTTP status, session cookie, OIDC, download).
+ # Lines are prefixed with [DEBUG]. Disable in production when not investigating issues.
+ DebugLog: false
   # tries to set the receive / send buffer of the connections to the client
  # in case of high latency high bandwidth the defaults set by the OS might
  # be to low for a good experience
@@ -152,6 +157,62 @@ Security:
   # connection is opened.
   VerifyClientIp: true
 ```
+
+### Debug logging
+
+Extended debug logging helps troubleshoot authentication, session cookies, and RDP file
+download issues (for example `502` responses from a reverse proxy when the session is
+missing or `Authenticated: false` in the logs).
+
+Enable it in `rdpgw.yaml`:
+
+```yaml
+Server:
+  DebugLog: true
+```
+
+Or with an environment variable (overrides / merges with the config file via koanf):
+
+```bash
+export RDPGW_SERVER_DEBUGLOG=true
+```
+
+On startup you should see:
+
+```text
+Extended debug logging enabled (Server.DebugLog / RDPGW_SERVER_DEBUGLOG)
+```
+
+#### What is logged
+
+All debug lines are prefixed with `[DEBUG]` and never include passwords, access tokens,
+or PAA token values. Typical messages:
+
+| Prefix / area | Purpose |
+|---------------|---------|
+| `HTTP GET /connect ... -> 302` | Request method, path, session cookie present, HTTP status, duration |
+| `identity path=... user=... auth=... cookieSession=...` | Session loaded or created per request |
+| `session loaded` / `session saved` | Cookie store read/write and whether `accessToken` is stored |
+| `OIDC login redirect` | Unauthenticated access redirected to the IdP |
+| `OIDC callback` | Username resolved from claims and session saved after login |
+| `download start` / `download denied` | RDP file generation path |
+
+Use these together with the standard log line:
+
+```text
+Identity SessionId: ..., UserName: ..., Authenticated: ...
+```
+
+#### Example workflow
+
+1. Enable `DebugLog`, restart rdpgw, reproduce the issue.
+2. For a failing user, check whether `/connect` shows `cookieSession=false` or
+   `auth=false` after they should be logged in.
+3. If the callback logs `OIDC callback: user=...` but the next `/connect` still has
+   `cookieSession=false`, the reverse proxy is likely not forwarding `Set-Cookie` /
+   `Cookie` headers correctly.
+4. Turn `DebugLog` off again when finished.
+
 ## Testing locally
 A convenience docker-compose allows you to test the RDPGW locally. It uses [Keycloak](http://www.keycloak.org) 
 and [xrdp](http://www.xrdp.org) and exposes it services on port 443. You will need to allow your browser

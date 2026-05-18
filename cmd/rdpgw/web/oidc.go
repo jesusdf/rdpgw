@@ -90,7 +90,9 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	if userName == "" {
 		err = errors.New("no odic claim for username found")
 		log.Print(err)
+		Debugf("OIDC callback: no username in claims; claim keys=%v", claimKeys(data))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	id.SetUserName(userName)
@@ -99,11 +101,24 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	id.SetAuthTime(time.Now())
 	id.SetAttribute(identity.AttrAccessToken, oauth2Token.AccessToken)
 
+	Debugf("OIDC callback: user=%q redirectTo=%q accessToken=%t cookieSession=%t",
+		userName, url, oauth2Token.AccessToken != "", hasSessionCookie(r))
+
 	if err = SaveSessionIdentity(r, w, id); err != nil {
+		Debugf("OIDC callback: session save failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, url, http.StatusFound)
+}
+
+func claimKeys(data map[string]interface{}) []string {
+	keys := make([]string, 0, len(data))
+	for k := range data {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func findUsernameInClaims(data map[string]interface{}) string {
@@ -146,11 +161,14 @@ func (h *OIDC) Authenticated(next http.Handler) http.Handler {
 			}
 			state := hex.EncodeToString(seed)
 			h.stateStore.Set(state, r.RequestURI, cache.DefaultExpiration)
-			http.Redirect(w, r, h.oAuth2Config.AuthCodeURL(state), http.StatusFound)
+			authURL := h.oAuth2Config.AuthCodeURL(state)
+			Debugf("OIDC login redirect path=%s returnURI=%q cookieSession=%t sessionId=%s",
+				r.URL.Path, r.RequestURI, hasSessionCookie(r), id.SessionId())
+			http.Redirect(w, r, authURL, http.StatusFound)
 			return
 		}
 
-		// replace the identity with the one from the sessions
+		Debugf("OIDC authenticated path=%s user=%q accessToken=%t", r.URL.Path, id.UserName(), hasAccessToken(id))
 		next.ServeHTTP(w, r)
 	})
 }

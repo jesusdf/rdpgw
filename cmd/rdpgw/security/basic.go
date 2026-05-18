@@ -28,7 +28,7 @@ func CheckHost(ctx context.Context, host string) (bool, error) {
 
 		log.Printf("Checking host for user %s", s.User.UserName())
 		for _, h := range Hosts {
-			h = strings.Replace(h, "{{ preferred_username }}", s.User.UserName(), 1)
+			h = strings.Replace(h, "{{ preferred_username }}", sanitizeHostLabel(s.User.UserName()), 1)
 			if h == host {
 				return true, nil
 			}
@@ -37,4 +37,24 @@ func CheckHost(ctx context.Context, host string) (bool, error) {
 	}
 
 	return false, errors.New("unrecognized host selection criteria")
+}
+
+func sanitizeHostLabel(username string) string {
+	s := strings.TrimSpace(username)
+	if s == "" {
+		return "user"
+	}
+	s = strings.ReplaceAll(s, " ", "-")
+	s = strings.ReplaceAll(s, "@", "-")
+	var b strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '.' {
+			b.WriteRune(r)
+		}
+	}
+	out := b.String()
+	if out == "" {
+		return "user"
+	}
+	return out
 }

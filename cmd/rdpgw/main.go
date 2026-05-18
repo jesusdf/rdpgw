@@ -94,6 +94,11 @@ func main() {
 	security.HostSelection = conf.Server.HostSelection
 	security.Hosts = conf.Server.Hosts
 
+	web.SetDebugLog(conf.Server.DebugLog)
+	if conf.Server.DebugLog {
+		log.Printf("Extended debug logging enabled (Server.DebugLog / RDPGW_SERVER_DEBUGLOG)")
+	}
+
 	// init session store
 	web.InitStore([]byte(conf.Server.SessionKey),
 		[]byte(conf.Server.SessionEncryptionKey),
@@ -206,6 +211,10 @@ func main() {
 
 	r := mux.NewRouter()
 
+	// debug request log outermost so it records status even when inner middleware errors
+	if conf.Server.DebugLog {
+		r.Use(web.DebugRequestLog)
+	}
 	// ensure identity is set in context and get some extra info
 	r.Use(web.EnrichContext)
 

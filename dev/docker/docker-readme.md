@@ -31,5 +31,12 @@ docker --run name rdpgw jesusdf/rdpgw:latest \
   -e RDPGW_OPENID__CLIENT_ID=rdpgw
   -e RDPGW_OPENID__CLIENT_SECRET=01cd304c-6f43-4480-9479-618eb6fd578f
   -e RDPGW_SECURITY__SECURITY_PAA_TOKEN_SIGNING_KEY=prettypleasereplacemeinproductio # 32 characters
+  -e RDPGW_SERVER_DEBUGLOG=true  # optional: verbose [DEBUG] logs (see README.md)
   -v conf:/etc/rdpgw
 ```
+
+### Debug logging
+
+Set `RDPGW_SERVER_DEBUGLOG=true` or `Server.DebugLog: true` in `rdpgw.yaml` to log session,
+OIDC, and download troubleshooting details (prefix `[DEBUG]`). See the main [README.md](../../README.md)
+section *Debug logging* for details. Disable after investigating issues.

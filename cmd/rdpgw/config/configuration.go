@@ -51,6 +51,7 @@ type ServerConfig struct {
 	Tls                  string   `koanf:"tls"`
 	Authentication       []string `koanf:"authentication"`
 	AuthSocket           string   `koanf:"authsocket"`
+	DebugLog             bool     `koanf:"debuglog"`
 }
 
 type KerberosConfig struct {
@@ -152,6 +153,7 @@ func Load(configFile string) Configuration {
 		"Client.AllowExtraSettings":  false,
 		"Security.VerifyClientIp":    true,
 		"Caps.TokenAuth":             true,
+		"Server.DebugLog":            false,
 	}, "."), nil)
 
 	if err := k.Load(file.Provider(configFile), yaml.Parser()); err != nil {

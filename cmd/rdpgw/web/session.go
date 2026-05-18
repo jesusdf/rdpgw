@@ -59,11 +59,16 @@ func GetSessionIdentity(r *http.Request) (identity.Identity, error) {
 
 	idData := s.Values[identityKey]
 	if idData == nil {
+		Debugf("session %q present but identity key %q missing (cookie=%t)", rdpGwSession, identityKey, hasSessionCookie(r))
 		return nil, nil
 
 	}
 	id := identity.NewUser()
-	id.Unmarshal(idData.([]byte))
+	if err := id.Unmarshal(idData.([]byte)); err != nil {
+		Debugf("session identity unmarshal failed: %v", err)
+		return nil, err
+	}
+	Debugf("session loaded sessionId=%s user=%q auth=%t accessToken=%t", id.SessionId(), id.UserName(), id.Authenticated(), hasAccessToken(id))
 	return id, nil
 }
 
@@ -80,6 +85,11 @@ func SaveSessionIdentity(r *http.Request, w http.ResponseWriter, id identity.Ide
 	}
 	session.Values[identityKey] = idData
 
-	return sessionStore.Save(r, w, session)
+	if err := sessionStore.Save(r, w, session); err != nil {
+		Debugf("session save failed sessionId=%s user=%q auth=%t: %v", id.SessionId(), id.UserName(), id.Authenticated(), err)
+		return err
+	}
+	Debugf("session saved sessionId=%s user=%q auth=%t accessToken=%t maxAge=%d", id.SessionId(), id.UserName(), id.Authenticated(), hasAccessToken(id), session.Options.MaxAge)
+	return nil
 
 }

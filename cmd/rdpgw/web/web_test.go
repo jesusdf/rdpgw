@@ -107,6 +107,41 @@ func TestGetHost(t *testing.T) {
 	}
 }
 
+func TestHandler_HandleDownload_UsernameWithSpace(t *testing.T) {
+	req, err := http.NewRequest("GET", "/connect", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	id := identity.NewUser()
+	id.SetUserName("John Doe")
+	id.SetAuthenticated(true)
+	req = identity.AddToRequestCtx(id, req)
+
+	u, _ := url.Parse(gateway)
+	c := Config{
+		HostSelection:     "roundrobin",
+		Hosts:             []string{"vm-{{ preferred_username }}-internal:3389"},
+		PAATokenGenerator: paaTokenMock,
+		GatewayAddress:    u,
+	}
+	h := c.NewHandler()
+	http.HandlerFunc(h.HandleDownload).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status %d body %q", rr.Code, rr.Body.String())
+	}
+
+	data := rdpToMap(strings.Split(rr.Body.String(), crlf))
+	if data["username"] != "John Doe" {
+		t.Errorf("username: got %q want %q", data["username"], "John Doe")
+	}
+	if data["full address"] != "vm-John-Doe-internal:3389" {
+		t.Errorf("full address: got %q want %q", data["full address"], "vm-John-Doe-internal:3389")
+	}
+}
+
 func TestHandler_HandleDownload(t *testing.T) {
 	req, err := http.NewRequest("GET", "/connect", nil)
 	if err != nil {
