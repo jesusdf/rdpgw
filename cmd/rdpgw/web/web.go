@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -160,7 +159,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 
 	render := user
 	if opts.UsernameTemplate != "" {
-		render = fmt.Sprintf(h.rdpOpts.UsernameTemplate)
+		render = h.rdpOpts.UsernameTemplate
 		render = strings.Replace(render, "{{ username }}", user, 1)
 		if h.rdpOpts.UsernameTemplate == render {
 			log.Printf("Invalid username template. %s == %s", h.rdpOpts.UsernameTemplate, user)

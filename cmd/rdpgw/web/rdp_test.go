@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"strings"
 	"testing"
 )
@@ -27,7 +26,7 @@ func TestRdpBuilder(t *testing.T) {
 		t.Fatalf("%s does not contain smart sizing:i:1", s)
 
 	}
-	log.Printf(builder.String())
+	t.Log(builder.String())
 }
 
 func TestInitStruct(t *testing.T) {
