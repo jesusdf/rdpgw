@@ -40,8 +40,8 @@ func CheckSession(next protocol.CheckHostFunc) protocol.CheckHostFunc {
 			return false, errors.New("no valid session info found in context")
 		}
 
-		if tunnel.GetTargetServer() != host {
-			log.Printf("Client specified host %s does not match token host %s", host, tunnel.GetTargetServer())
+		if tunnel.TargetServer != host {
+			log.Printf("Client specified host %s does not match token host %s", host, tunnel.TargetServer)
 			return false, nil
 		}
 
@@ -106,31 +106,11 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	tunnel := getTunnel(ctx)
 
-	// Subject del JWT PAA: mismo username que en GeneratePAAToken al descargar el .rdp.
-	// user.Subject de UserInfo OIDC suele ser el claim "sub" (opaco), no preferred_username.
-	username := standard.Subject
-	if username == "" {
-		username = usernameFromOIDCUserInfo(user)
-	}
-	tunnel.ApplyPAAIdentity(custom.RemoteServer, custom.ClientIP, username)
+	tunnel.TargetServer = custom.RemoteServer
+	tunnel.RemoteAddr = custom.ClientIP
+	tunnel.User.SetUserName(user.Subject)
 
 	return true, nil
-}
-
-func usernameFromOIDCUserInfo(user *oidc.UserInfo) string {
-	if user == nil {
-		return ""
-	}
-	var claims map[string]interface{}
-	if err := user.Claims(&claims); err != nil {
-		return user.Subject
-	}
-	for _, claim := range []string{"preferred_username", "unique_name", "upn", "email", "name"} {
-		if s, ok := claims[claim].(string); ok && s != "" {
-			return s
-		}
-	}
-	return user.Subject
 }
 
 func GeneratePAAToken(ctx context.Context, username string, server string) (string, error) {

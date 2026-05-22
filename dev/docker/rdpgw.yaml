@@ -8,7 +8,6 @@ Server:
  RoundRobin: false
  SessionKey: thisisasessionkeyreplacethisjetz
  SessionEncryptionKey: thisisasessionkeyreplacethisnunu
- # DebugLog: true
 OpenId:
  ProviderUrl: http://keycloak:8080/auth/realms/rdpgw
  ClientId: rdpgw

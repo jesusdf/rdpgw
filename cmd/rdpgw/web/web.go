@@ -135,14 +135,9 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 
 	if !id.Authenticated() {
 		log.Printf("unauthenticated user %s", id.UserName())
-		Debugf("download denied: not authenticated user=%q sessionId=%s cookieSession=%t accessToken=%t",
-			id.UserName(), id.SessionId(), hasSessionCookie(r), hasAccessToken(id))
 		http.Error(w, errors.New("cannot find session or user").Error(), http.StatusInternalServerError)
 		return
 	}
-
-	Debugf("download start user=%q sessionId=%s accessToken=%t cookieSession=%t host=%q",
-		id.UserName(), id.SessionId(), hasAccessToken(id), hasSessionCookie(r), r.Host)
 
 	// determine host to connect to
 	host, err := h.getHost(ctx, r.URL)
@@ -150,13 +145,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	host = applyPreferredUsernameToHost(host, id.UserName())
-	if err := validateHostAddress(host); err != nil {
-		log.Printf("Invalid host for user %q: %v", id.UserName(), err)
-		Debugf("download invalid host %q for user=%q", host, id.UserName())
-		http.Error(w, errors.New("invalid server configuration").Error(), http.StatusInternalServerError)
-		return
-	}
+	host = strings.Replace(host, "{{ preferred_username }}", id.UserName(), 1)
 
 	// split the username into user and domain
 	var user = id.UserName()
@@ -171,7 +160,7 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 
 	render := user
 	if opts.UsernameTemplate != "" {
-		render = fmt.Sprintf("%s", h.rdpOpts.UsernameTemplate)
+		render = fmt.Sprintf(h.rdpOpts.UsernameTemplate)
 		render = strings.Replace(render, "{{ username }}", user, 1)
 		if h.rdpOpts.UsernameTemplate == render {
 			log.Printf("Invalid username template. %s == %s", h.rdpOpts.UsernameTemplate, user)
@@ -183,19 +172,14 @@ func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	token, err := h.paaTokenGenerator(ctx, user, host)
 	if err != nil {
 		log.Printf("Cannot generate PAA token for user %s due to %s", user, err)
-		Debugf("download PAA token failed user=%q accessToken=%t clientIP=%v: %v",
-			user, hasAccessToken(id), id.GetAttribute(identity.AttrClientIp), err)
 		http.Error(w, errors.New("unable to generate gateway credentials").Error(), http.StatusInternalServerError)
-		return
 	}
 
 	if h.enableUserToken {
 		userToken, err := h.userTokenGenerator(ctx, user)
 		if err != nil {
 			log.Printf("Cannot generate token for user %s due to %s", user, err)
-			Debugf("download user token failed user=%q: %v", user, err)
 			http.Error(w, errors.New("unable to generate gateway credentials").Error(), http.StatusInternalServerError)
-			return
 		}
 		render = strings.Replace(render, "{{ token }}", userToken, 1)
 	}

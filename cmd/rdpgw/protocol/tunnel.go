@@ -1,13 +1,10 @@
 package protocol
 
 import (
-	"net"
-	"strings"
-	"sync"
-	"time"
-
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/identity"
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/transport"
+	"net"
+	"time"
 )
 
 const (
@@ -47,74 +44,6 @@ type Tunnel struct {
 
 	// LastSeen is when the server received the last packet from the client
 	LastSeen time.Time
-
-	metaMu sync.RWMutex
-}
-
-// SetTargetServer records the TCP destination after the RDP channel is established.
-func (t *Tunnel) SetTargetServer(host string) {
-	t.metaMu.Lock()
-	t.TargetServer = host
-	t.metaMu.Unlock()
-}
-
-// GetTargetServer returns the current backend address (empty until the channel is open).
-func (t *Tunnel) GetTargetServer() string {
-	t.metaMu.RLock()
-	defer t.metaMu.RUnlock()
-	return t.TargetServer
-}
-
-// ApplyPAAIdentity sets tunnel fields from a validated PAA (gateway) token.
-func (t *Tunnel) ApplyPAAIdentity(remoteServer, clientIP, subject string) {
-	t.metaMu.Lock()
-	t.TargetServer = remoteServer
-	t.RemoteAddr = clientIP
-	if t.User != nil {
-		t.User.SetUserName(subject)
-	}
-	t.metaMu.Unlock()
-}
-
-// ConnectionInfo returns a snapshot of tunnel and identity fields for status APIs.
-func (t *Tunnel) ConnectionInfo() ActiveConnection {
-	t.metaMu.RLock()
-	defer t.metaMu.RUnlock()
-
-	info := ActiveConnection{
-		ID:            t.Id,
-		RDGConnection: t.RDGId,
-		Target:        t.TargetServer,
-		ConnectedAt:   t.ConnectedOn,
-		LastSeen:      t.LastSeen,
-	}
-	if t.User == nil {
-		return info
-	}
-	info.Username = t.User.UserName()
-	info.DisplayName = t.User.DisplayName()
-	info.Domain = t.User.Domain()
-	info.Email = t.User.Email()
-	info.Authenticated = t.User.Authenticated()
-	info.SessionID = t.User.SessionId()
-	info.ClientIP = identityStringAttr(t.User, identity.AttrClientIp)
-	if info.Domain == "" {
-		if creds := strings.SplitN(info.Username, "@", 2); len(creds) == 2 {
-			info.Domain = creds[1]
-		}
-	}
-	return info
-}
-
-func identityStringAttr(id identity.Identity, key string) string {
-	if id == nil {
-		return ""
-	}
-	v := id.GetAttribute(key)
-	if s, ok := v.(string); ok {
-		return s
-	}
-	return ""
 }
 
 // Write puts the packet on the transport and updates the statistics for bytes sent
