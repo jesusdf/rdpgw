@@ -28,7 +28,7 @@ func TestConnectionsTwoNames(t *testing.T) {
 		protocol.RemoveTunnel(&protocol.Tunnel{Id: "names-test-1"})
 	}()
 
-	req := httptest.NewRequest(http.MethodGet, "/conexiones", nil)
+	req := httptest.NewRequest(http.MethodGet, "/connections", nil)
 	rec := httptest.NewRecorder()
 	Connections(rec, req)
 
@@ -37,9 +37,8 @@ func TestConnectionsTwoNames(t *testing.T) {
 	}
 
 	var resp struct {
-		Count       int `json:"count"`
 		Connections []struct {
-			User        string `json:"user"`
+			Username    string `json:"username"`
 			DisplayName string `json:"displayName"`
 		} `json:"connections"`
 	}
@@ -49,7 +48,7 @@ func TestConnectionsTwoNames(t *testing.T) {
 
 	var found bool
 	for _, c := range resp.Connections {
-		if c.User == "jdieguez" {
+		if c.Username == "jdieguez" {
 			found = true
 			if c.DisplayName != "Jesús María Diéguez Pérez" {
 				t.Errorf("displayName = %q, want %q", c.DisplayName, "Jesús María Diéguez Pérez")

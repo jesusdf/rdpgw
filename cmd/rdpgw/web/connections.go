@@ -11,19 +11,18 @@ import (
 // connectionInfo is the JSON representation of a single active connection.
 type connectionInfo struct {
 	Id            string    `json:"id"`
-	User          string    `json:"user"`
+	Username      string    `json:"username"`
 	DisplayName   string    `json:"displayName"`
 	Domain        string    `json:"domain"`
 	Target        string    `json:"target"`
 	RemoteAddr    string    `json:"remoteAddr"`
-	ConnectedOn   time.Time `json:"connectedOn"`
+	ConnectedAt   time.Time `json:"connectedAt"`
 	LastSeen      time.Time `json:"lastSeen"`
 	BytesSent     int64     `json:"bytesSent"`
 	BytesReceived int64     `json:"bytesReceived"`
 }
 
 type connectionsResponse struct {
-	Count       int              `json:"count"`
 	Connections []connectionInfo `json:"connections"`
 }
 
@@ -43,13 +42,13 @@ func Connections(w http.ResponseWriter, r *http.Request) {
 			Id:            t.Id,
 			Target:        t.TargetServer,
 			RemoteAddr:    t.RemoteAddr,
-			ConnectedOn:   t.ConnectedOn,
+			ConnectedAt:   t.ConnectedOn,
 			LastSeen:      t.LastSeen,
 			BytesSent:     t.BytesSent,
 			BytesReceived: t.BytesReceived,
 		}
 		if t.User != nil {
-			c.User = t.User.UserName()
+			c.Username = t.User.UserName()
 			c.DisplayName = t.User.DisplayName()
 			c.Domain = t.User.Domain()
 		}
@@ -57,7 +56,6 @@ func Connections(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := connectionsResponse{
-		Count:       len(list),
 		Connections: list,
 	}
 
