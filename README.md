@@ -178,6 +178,45 @@ It will return 200 OK with the decrypted token.
 
 In this way you can integrate, for example, it with [pam-jwt](https://github.com/jesusdf/pam-jwt).
 
+## Active connections
+The gateway exposes the list of currently active connections at
+https://yourserver/connections . A `GET` returns `200 OK` with a JSON document
+describing who is connected and to which target host:
+
+```json
+{
+  "connections": [
+    {
+      "id": "11111111-aaaa-bbbb-cccc-222222222222",
+      "username": "jdoe",
+      "displayName": "John Doe",
+      "domain": "EXAMPLE",
+      "target": "10.0.0.15:3389",
+      "remoteAddr": "203.0.113.7",
+      "connectedAt": "2026-06-17T14:30:00Z",
+      "lastSeen": "2026-06-17T14:35:00Z",
+      "bytesSent": 1048576,
+      "bytesReceived": 524288
+    }
+  ]
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `id` | Internal tunnel identifier (UUID) |
+| `username` | Authenticated user (from the OIDC `preferred_username`/`unique_name`/`upn` claim) |
+| `displayName` | Human readable name; falls back to `username` when not provided |
+| `domain` | User domain, when available |
+| `target` | Remote desktop host the client is connected to (`host:port`) |
+| `remoteAddr` | Client IP address |
+| `connectedAt` | When the connection was established (RFC 3339) |
+| `lastSeen` | When the last packet was received from the client (RFC 3339) |
+| `bytesSent` / `bytesReceived` | Tunnel traffic in bytes |
+
+__NOTE__: this endpoint is not authenticated, so make sure it is not exposed to
+untrusted networks (e.g. restrict it at your reverse proxy or load balancer).
+
 ## TODO
 * Integrate Open Policy Agent
 * Integrate GOKRB5
