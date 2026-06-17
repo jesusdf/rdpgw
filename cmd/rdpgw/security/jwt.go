@@ -108,9 +108,43 @@ func CheckPAACookie(ctx context.Context, tokenString string) (bool, error) {
 
 	tunnel.TargetServer = custom.RemoteServer
 	tunnel.RemoteAddr = custom.ClientIP
-	tunnel.User.SetUserName(user.Subject)
+
+	// Prefer a human readable username/display name from the OIDC claims.
+	// user.Subject is the `sub` claim, which most providers (Keycloak, Azure AD,
+	// ...) expose as an opaque GUID, so it is only used as a last resort.
+	var claims struct {
+		PreferredUsername string `json:"preferred_username"`
+		UniqueName        string `json:"unique_name"`
+		Upn               string `json:"upn"`
+		Name              string `json:"name"`
+		Email             string `json:"email"`
+	}
+	_ = user.Claims(&claims)
+
+	userName := pickUsername(claims.PreferredUsername, claims.UniqueName, claims.Upn, user.Subject)
+
+	tunnel.User.SetUserName(userName)
+	if claims.Name != "" {
+		tunnel.User.SetDisplayName(claims.Name)
+	}
+	if claims.Email != "" {
+		tunnel.User.SetEmail(claims.Email)
+	}
 
 	return true, nil
+}
+
+// pickUsername returns the first non-empty human readable username candidate,
+// falling back to the subject (the OIDC `sub` claim, usually an opaque GUID)
+// only when no readable claim is available. Values are returned verbatim, so
+// names containing spaces (e.g. "Jesús María Diéguez") are preserved as-is.
+func pickUsername(preferred, unique, upn, subject string) string {
+	for _, candidate := range []string{preferred, unique, upn} {
+		if candidate != "" {
+			return candidate
+		}
+	}
+	return subject
 }
 
 func GeneratePAAToken(ctx context.Context, username string, server string) (string, error) {
