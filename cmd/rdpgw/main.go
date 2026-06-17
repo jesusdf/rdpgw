@@ -218,6 +218,9 @@ func main() {
 	// for healthcheck
 	r.HandleFunc("/teapot", web.Teapot)
 
+	// list of currently active connections (who is connected and to where)
+	r.HandleFunc("/conexiones", web.Connections)
+
 	// gateway endpoint
 	rdp := r.PathPrefix(gatewayEndPoint).Subrouter()
 
