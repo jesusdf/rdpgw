@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/jesusdf/rdpgw/cmd/rdpgw/protocol"
@@ -54,6 +55,11 @@ func Connections(w http.ResponseWriter, r *http.Request) {
 		}
 		list = append(list, c)
 	}
+
+	// oldest connection first
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].ConnectedAt.Before(list[j].ConnectedAt)
+	})
 
 	resp := connectionsResponse{
 		Connections: list,
